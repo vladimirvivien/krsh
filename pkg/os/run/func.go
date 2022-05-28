@@ -30,7 +30,7 @@ func run(_ *starlark.Thread, b *starlark.Builtin, _ starlark.Tuple, kwargs []sta
 
 	proc := gexe.New().RunProc(args.Cmd)
 	if proc.Err() != nil {
-		return typekit.BuiltinError(Name, proc.Err())
+		return typekit.ScriptError(Name, proc.Err())
 	}
 	return typekit.BuiltinResult(
 		Name,

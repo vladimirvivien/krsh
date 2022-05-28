@@ -58,6 +58,7 @@ func TestRunFuncScript(t *testing.T) {
 		expected string
 	}{
 		{
+			name:     "simple script",
 			script:   `result=os.run(cmd="""echo 'Salut Monde!'""")`,
 			expected: "Salut Monde!",
 		},

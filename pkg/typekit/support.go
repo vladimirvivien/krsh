@@ -18,6 +18,11 @@ func BuiltinError(funcName string, err error) (starlark.Value, error) {
 	return starlark.None, fmt.Errorf("%s: failed: %s", funcName, err)
 }
 
+func ScriptError(funcName string, err error) (starlark.Value, error) {
+	msg := starlark.String(fmt.Sprintf("%s: failed: %s", funcName, err))
+	return starlarkstruct.FromStringDict(starlark.String("error"), starlark.StringDict{"error": msg}), nil
+}
+
 func AsStarlarkStruct(value interface{}) (*starlarkstruct.Struct, error) {
 	starStruct := new(starlarkstruct.Struct)
 	if err := Go(value).Starlark(starStruct); err != nil {
