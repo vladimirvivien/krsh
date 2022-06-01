@@ -68,11 +68,18 @@ func (v *StarValue) Go(goPtr interface{}) error {
 //      *starlark.Set   	-- []T
 
 func starlarkToGo(srcVal starlark.Value, goval reflect.Value) error {
+	if srcVal == nil {
+		return nil
+	}
+	if !goval.IsValid() {
+		return fmt.Errorf("target type is invalid")
+	}
 	gotype := goval.Type()
 
 	var starval reflect.Value
-	sourceType := srcVal.Type()
-	switch sourceType {
+	srcType := srcVal.Type()
+
+	switch srcType {
 	case "bool":
 		if gotype.Kind() != reflect.Bool && gotype.Kind() != reflect.Interface {
 			return fmt.Errorf("target type must be bool")
@@ -242,7 +249,7 @@ func starlarkToGo(srcVal starlark.Value, goval reflect.Value) error {
 		}
 		return nil
 	default:
-		return fmt.Errorf("unsupported type: %s", sourceType)
+		return fmt.Errorf("unsupported type: %s", srcType)
 	}
 
 	startype := starval.Type()

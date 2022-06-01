@@ -326,6 +326,53 @@ func TestGoToStarlark(t *testing.T) {
 			},
 		},
 		{
+			name:  "Struct-with-substruct-to-starlarkstruct",
+			goVal: struct{ Msg struct{ Message string } }{Msg: struct{ Message string }{Message: "Hello World!"}},
+			eval: func(t *testing.T, goVal interface{}) {
+				var starval starlarkstruct.Struct
+				if err := goToStarlark(goVal, &starval); err != nil {
+					t.Fatal(err)
+				}
+				structVal, err := starval.Attr("Msg")
+				if err != nil {
+					t.Fatalf("failed to get value from starlarkstruct.Struct: %s", err)
+				}
+
+				starstruct, ok := structVal.(*starlarkstruct.Struct)
+				if !ok {
+					t.Fatalf("unexpected type: %T", structVal)
+				}
+
+				val, err := starstruct.Attr("Message")
+				if err != nil {
+					t.Fatalf("failed to get value from starlarkstruct.Struct: [%#v], %s ", starval, err)
+				}
+
+				if val.String() != `"Hello World!"` {
+					t.Errorf("unexpected value for starlark.Dict value: %s", val.String())
+				}
+			},
+		},
+		{
+			name:  "Pointer-Struct-starlarkstruct",
+			goVal: &struct{ Msg, Target string }{Msg: "hello", Target: "world"},
+			eval: func(t *testing.T, goVal interface{}) {
+				var starval starlarkstruct.Struct
+				if err := goToStarlark(goVal, &starval); err != nil {
+					t.Fatal(err)
+				}
+				val, err := starval.Attr("Msg")
+				if err != nil {
+					t.Fatalf("failed to get value from starlarkstruct.Struct: [%#v], %s ", starval, err)
+				}
+
+				if val.String() != `"hello"` {
+					t.Errorf("unexpected value for starlark.Dict value: %s", val.String())
+				}
+
+			},
+		},
+		{
 			name:  "List[string]",
 			goVal: []string{"Hello", "World!"},
 			eval: func(t *testing.T, goVal interface{}) {

@@ -36,7 +36,7 @@ func TestRun(t *testing.T) {
 				return ctx
 			},
 		},
-	}.Build("Random numbers")
+	}.Build("run deployment")
 
 	testEnv.Test(t, testTable.Feature())
 }

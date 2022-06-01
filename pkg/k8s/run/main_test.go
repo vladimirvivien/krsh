@@ -18,7 +18,7 @@ var (
 func TestMain(m *testing.M) {
 	cfg, _ := envconf.NewFromFlags()
 	testEnv = env.NewWithConfig(cfg)
-	kindClusterName = envconf.RandomName("crdtest-", 16)
+	kindClusterName = envconf.RandomName("test-", 16)
 	namespace = envconf.RandomName("my-ns", 10)
 
 	testEnv.Setup(

@@ -42,5 +42,8 @@ func (c ObjectMetaConstructor) Annotations(labels map[string]string) ObjectMetaC
 
 // Build is the finalizer that builds and returns metaV1.ObjectMeta
 func (c ObjectMetaConstructor) Build() metaV1.ObjectMeta {
+	if c.obj.Namespace == "" {
+		c.obj.Namespace = DefaultNamespace
+	}
 	return c.obj
 }

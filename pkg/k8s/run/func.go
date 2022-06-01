@@ -49,15 +49,21 @@ func run(_ *starlark.Thread, b *starlark.Builtin, _ starlark.Tuple, kwargs []sta
 		return typekit.ScriptError(Name, err)
 	}
 
-	return typekit.BuiltinResult(Name, Result{Deployment: dep})
+	return typekit.BuiltinResult(Name, Result{})
 }
 
 func makeDeployment(args Args) appsV1.Deployment {
+	if args.Namespace == "" {
+		args.Namespace = "default"
+	}
+	if args.Labels == nil {
+		args.Labels = map[string]string{"app": args.Name}
+	}
 	return deployment.Deployment(
 		meta.Object(args.Name).Namespace(args.Namespace),
 		deployment.Replicas(1),
 		meta.MatchLabels(args.Labels),
 		deployment.StrategyDefault,
-		pod.Template(meta.ObjectMetaNone, pod.Spec(container.Name(args.Name).Image(args.Image))),
+		pod.Template(meta.Object(args.Name).Labels(args.Labels), pod.Spec(container.Name(args.Name).Image(args.Image))),
 	).Build()
 }

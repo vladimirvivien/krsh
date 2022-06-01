@@ -122,6 +122,10 @@ func goToStarlark(gov interface{}, starval interface{}) error {
 	goval := reflect.ValueOf(gov)
 	gotype := goval.Type()
 
+	//if !goval.IsValid() {
+	//	goval.Set(reflect.New(goval.Type()))
+	//}
+
 	switch gotype.Kind() {
 	case reflect.Bool:
 		switch val := starval.(type) {
@@ -273,6 +277,14 @@ func goToStarlark(gov interface{}, starval interface{}) error {
 
 		return nil
 
+	case reflect.Ptr:
+		goElem := goval.Elem()
+		if !goElem.IsValid() {
+			starval = starlark.None
+			return nil
+		}
+		return goToStarlark(goElem.Interface(), starval)
+
 	default:
 		return fmt.Errorf("unable to convert Go type %T to Starlark type", gov)
 	}
@@ -284,8 +296,12 @@ func goStructToStringDict(goval reflect.Value) (starlark.StringDict, error) {
 	stringDict := make(starlark.StringDict)
 	for i := 0; i < goval.NumField(); i++ {
 		field := gotype.Field(i)
-		fname := field.Name
+		// only grab exported field to avoid panic
+		if !field.IsExported() {
+			continue
+		}
 
+		fname := field.Name
 		// get starlarkstruct field name from tag (if any)
 		name, _ := field.Tag.Lookup("name")
 		if name != "" {
@@ -293,6 +309,7 @@ func goStructToStringDict(goval reflect.Value) (starlark.StringDict, error) {
 		}
 
 		var fval starlark.Value
+
 		if err := goToStarlark(goval.Field(i).Interface(), &fval); err != nil {
 			return nil, fmt.Errorf("failed struct field conversion: %s", err)
 		}
